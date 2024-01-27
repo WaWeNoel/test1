@@ -7,15 +7,12 @@ function createWindow() {
   // Indítjuk az updater.js-t
   const updaterPath = path.join(__dirname, 'updater.js');
   const { exec } = require('child_process');
-  exec(`node ${updaterPath}`, (error, stdout, stderr) => {
+  const updaterProcess = exec(`node ${updaterPath}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Hiba az updater.js elindítása során: ${error}`);
       return;
     }
     console.log(`Az updater.js kimenete: ${stdout}`);
-
-    // Az updater.js lefutása után indítsuk újra az alkalmazást
-    restartApp();
   });
 
   // Létrehozzuk az Electron ablakot
@@ -33,6 +30,9 @@ function createWindow() {
   // Események figyelése, például az ablak bezárása
   mainWindow.on('closed', () => {
     mainWindow = null;
+    // Az updater.js újraindítása az Electron alkalmazással együtt
+    updaterProcess.kill();
+    exec(`node ${__filename}`);
   });
 }
 
@@ -50,11 +50,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-
-function restartApp() {
-  // Zárjuk be az aktuális ablakot
-  mainWindow.close();
-
-  // Hozzuk létre és indítsuk el egy új ablakot
-  createWindow();
-}
