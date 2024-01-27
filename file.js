@@ -12,6 +12,7 @@ function createWindow() {
       nodeIntegration: true
     },
     frame: false, // Keret eltávolítása
+    titleBarStyle: 'hiddenInset', // Felső sáv elrejtése (titleBarStyle)
     icon: path.join(__dirname, 'icon.png') // A saját ikonod elérési útja
   });
 
