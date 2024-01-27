@@ -1,23 +1,22 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 const { exec } = require('child_process');
 
 let mainWindow;
 
 function createWindow() {
-  // Eltávolítjuk az alapértelmezett menüt
-  Menu.setApplicationMenu(null);
-
-  // Konfiguráljuk az ablakot
+  // Létrehozzuk az Electron ablakot
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    icon: path.join(__dirname, 'icon.png'), // Új ikon beállítása
     webPreferences: {
       nodeIntegration: true
-    },
-    frame: true, // Ablakkeret bekapcsolása
-    icon: path.join(__dirname, 'your-icon.png') // A saját ikonod elérési útja
+    }
   });
+
+  // Távolítsuk el az alapértelmezett menüt
+  Menu.setApplicationMenu(null);
 
   // Betöltjük az üdvözlő HTML-t
   mainWindow.loadFile('index.html');
@@ -30,30 +29,18 @@ function createWindow() {
 
 // App események figyelése
 app.on('ready', () => {
-  createWindow();
-
-  // Az updater.js fájl elérési útja
+  // Indítsuk az updater.js-t
   const updaterPath = path.join(__dirname, 'updater.js');
-
-  // Indítjuk az updater.js-t
-  const updaterProcess = exec(`node ${updaterPath}`, (error) => {
+  exec(`node ${updaterPath}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Hiba az updater.js elindítása során: ${error}`);
+      return;
     }
+    console.log(`Az updater.js kimenete: ${stdout}`);
   });
 
-  // Figyeljük az updater.js kimenetét
-  updaterProcess.stdout.on('data', (data) => {
-    console.log(`Updater.js kimenet: ${data}`);
-  });
-
-  updaterProcess.stderr.on('data', (data) => {
-    console.error(`Updater.js hiba: ${data}`);
-  });
-
-  updaterProcess.on('close', (code) => {
-    console.log(`Updater.js leállt a kóddal: ${code}`);
-  });
+  // Hozzuk létre az ablakot
+  createWindow();
 });
 
 app.on('window-all-closed', () => {
