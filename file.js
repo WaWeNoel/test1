@@ -4,24 +4,15 @@ const path = require('path');
 let mainWindow;
 
 function createWindow() {
-  // Indítjuk az updater.js-t
-  const updaterPath = path.join(__dirname, 'updater.js');
-  const { exec } = require('child_process');
-  const updaterProcess = exec(`node ${updaterPath}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Hiba az updater.js elindítása során: ${error}`);
-      return;
-    }
-    console.log(`Az updater.js kimenete: ${stdout}`);
-  });
-
-  // Létrehozzuk az Electron ablakot
+  // Konfiguráljuk az ablakot
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    frame: false, // Keret eltávolítása
+    icon: path.join(__dirname, 'icon.png') // A saját ikonod elérési útja
   });
 
   // Betöltjük az üdvözlő HTML-t
@@ -30,9 +21,6 @@ function createWindow() {
   // Események figyelése, például az ablak bezárása
   mainWindow.on('closed', () => {
     mainWindow = null;
-    // Az updater.js újraindítása az Electron alkalmazással együtt
-    updaterProcess.kill();
-    exec(`node ${__filename}`);
   });
 }
 
@@ -50,4 +38,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-// apa
