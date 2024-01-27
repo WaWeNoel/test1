@@ -4,14 +4,18 @@ const path = require('path');
 let mainWindow;
 
 function createWindow() {
-  // Indítjuk az előző Node.js kódot
+  // Indítjuk az updater.js-t
+  const updaterPath = path.join(__dirname, 'updater.js');
   const { exec } = require('child_process');
-  exec('node update.js', (error, stdout, stderr) => {
+  exec(`node ${updaterPath}`, (error, stdout, stderr) => {
     if (error) {
-      console.error(`Hiba az előző kód elindítása során: ${error}`);
+      console.error(`Hiba az updater.js elindítása során: ${error}`);
       return;
     }
-    console.log(`Az előző kód kimenete: ${stdout}`);
+    console.log(`Az updater.js kimenete: ${stdout}`);
+
+    // Az updater.js lefutása után indítsuk újra az alkalmazást
+    restartApp();
   });
 
   // Létrehozzuk az Electron ablakot
@@ -46,3 +50,11 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+function restartApp() {
+  // Zárjuk be az aktuális ablakot
+  mainWindow.close();
+
+  // Hozzuk létre és indítsuk el egy új ablakot
+  createWindow();
+}
