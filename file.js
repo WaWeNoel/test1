@@ -7,32 +7,37 @@ function createWindow() {
   // Indítjuk az updater.js-t
   const updaterPath = path.join(__dirname, 'updater.js');
   const { exec } = require('child_process');
-  const updaterProcess = exec(`node ${updaterPath}`, (error, stdout, stderr) => {
+  exec(`node ${updaterPath}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Hiba az updater.js elindítása során: ${error}`);
       return;
     }
-    console.log(`Az updater.js kimenete: ${stdout}`);
-  });
 
-  // Létrehozzuk az Electron ablakot
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true
+    // Az updater.js kimenetének megfelelő üzenet kiírása
+    console.log(stdout);
+
+    // Az alkalmazás csak bezárul, nem indul újra
+    if (stdout.includes('2. Nem talált frissítést')) {
+      console.log('Az alkalmazás bezárul.');
+      process.exit();
     }
-  });
 
-  // Betöltjük az üdvözlő HTML-t
-  mainWindow.loadFile('index.html');
+    // Létrehozzuk az Electron ablakot
+    mainWindow = new BrowserWindow({
+      width: 800,
+      height: 600,
+      webPreferences: {
+        nodeIntegration: true
+      }
+    });
 
-  // Események figyelése, például az ablak bezárása
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-    // Az updater.js újraindítása az Electron alkalmazással együtt
-    updaterProcess.kill();
-    exec(`node ${__filename}`);
+    // Betöltjük az üdvözlő HTML-t
+    mainWindow.loadFile('index.html');
+
+    // Események figyelése, például az ablak bezárása
+    mainWindow.on('closed', () => {
+      mainWindow = null;
+    });
   });
 }
 
@@ -50,4 +55,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-// apa
